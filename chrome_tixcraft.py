@@ -47,7 +47,7 @@ try:
     from NonBrowser import NonBrowser
 except Exception as exc:
     pass
-
+# import ddddocr
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -1693,8 +1693,6 @@ def tixcraft_auto_ocr(driver, ocr, away_from_keyboard_enable, previous_answer, C
             print("previous_answer:", previous_answer)
             print("ocr_captcha_image_source:", ocr_captcha_image_source)
 
-        ocr_start_time = time.time()
-
         img_base64 = None
         if ocr_captcha_image_source == CONST_OCR_CAPTCH_IMAGE_SOURCE_NON_BROWSER:
             if not Captcha_Browser is None:
@@ -1724,16 +1722,12 @@ def tixcraft_auto_ocr(driver, ocr, away_from_keyboard_enable, previous_answer, C
                 orc_answer = ocr.classification(img_base64)
             except Exception as exc:
                 pass
-        
-        ocr_done_time = time.time()
-        ocr_elapsed_time = ocr_done_time - ocr_start_time
-        print("ocr elapsed time:", "{:.3f}".format(ocr_elapsed_time))
     else:
         print("ddddocr is None")
         
     if not orc_answer is None:
         orc_answer = orc_answer.strip()
-        print("orc_answer:", orc_answer)
+        # print("orc_answer:", orc_answer)
         if len(orc_answer)==4:
             who_care_var, is_form_sumbited = tixcraft_keyin_captcha_code(driver, answer = orc_answer, auto_submit = away_from_keyboard_enable)
         else:
@@ -1758,14 +1752,11 @@ def tixcraft_auto_ocr(driver, ocr, away_from_keyboard_enable, previous_answer, C
                             if new_captcha_url != "":
                                 tixcraft_change_captcha(driver, new_captcha_url) #更改CAPTCHA圖
     else:
-        print("orc_answer is None")
-        print("previous_answer:", previous_answer)
-        if previous_answer is None:
-            tixcraft_keyin_captcha_code(driver)
-        else:
-            # page is not ready, retry again.
-            # PS: usually occur in async script get captcha image.
-            is_need_redo_ocr = True
+        # print("orc_answer is None")
+        is_need_redo_ocr = True
+        if ocr_captcha_image_source == CONST_OCR_CAPTCH_IMAGE_SOURCE_NON_CANVAS:
+            time.sleep(0.2)
+        # print("TEST")
 
     return is_need_redo_ocr, previous_answer, is_form_sumbited
 
@@ -7022,6 +7013,7 @@ def main():
     DISCONNECTED_MSG = 'Unable to evaluate script: no such window: target window already closed'
 
     ocr = None
+    # ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
     Captcha_Browser = None
     try:
         if config_dict["ocr_captcha"]["enable"]:
